@@ -213,13 +213,19 @@ void Button::_notification(int p_what) {
 
 			Ref<StyleBox> style = _get_current_stylebox();
 			// Draws the stylebox in the current state.
+			//StyleBox::set_animation_id("button");
 			if (!flat) {
+				//StyleBox::animation_id = "button";
+				StyleBox::enter_animation_group("button");
 				style->draw(ci, Rect2(Point2(), size));
+				StyleBox::exit_animation_group();
 			}
 
+			StyleBox::enter_animation_group("focus");
 			if (has_focus(true)) {
 				theme_cache.focus->draw(ci, Rect2(Point2(), size));
 			}
+			StyleBox::exit_animation_group();
 
 			Ref<Texture2D> _icon = icon;
 			if (_icon.is_null() && has_theme_icon(SNAME("icon"))) {

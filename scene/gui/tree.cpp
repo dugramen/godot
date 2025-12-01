@@ -2266,6 +2266,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 
 	int label_h = 0;
 	bool rtl = cache.rtl;
+	//p_item->get_index();
 
 	// Draw label, if height fits.
 	bool skip = (p_item == root && hide_root);
@@ -2359,6 +2360,8 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 				cell_rect.size.x += theme_cache.h_separation;
 			}
 
+			String anim_id = itos(p_item->get_instance_id());
+			StyleBox::enter_animation_group(anim_id);
 			if (i == 0 && select_mode == SELECT_ROW) {
 				if (p_item->cells[0].selected || is_row_hovered) {
 					const Rect2 content_rect = _get_content_rect();
@@ -2427,6 +2430,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 					p_item->cells.write[i].focus_rect = Rect2(r.position, r.size);
 				}
 			}
+			StyleBox::exit_animation_group();
 
 			if (theme_cache.draw_guides) {
 				Rect2 r = convert_rtl_rect(cell_rect);
@@ -2506,6 +2510,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 			Point2i text_pos = item_rect.position;
 			text_pos.y += Math::floor((item_rect.size.y - p_item->cells[i].text_buf->get_size().y) * 0.5);
 
+			StyleBox::apply_group_modifiers(anim_id);
 			switch (p_item->cells[i].mode) {
 				case TreeItem::CELL_MODE_STRING: {
 					draw_item_rect(p_item->cells[i], item_rect, cell_color, icon_col, outline_size, font_outline_color);
@@ -2691,6 +2696,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 				button_texture->draw(ci, button_ofs, p_item->cells[i].buttons[j].disabled ? Color(1, 1, 1, 0.5) : p_item->cells[i].buttons[j].color);
 				item_width_with_buttons -= button_size.width + theme_cache.button_margin;
 			}
+			StyleBox::reset_modifiers();
 
 			if (i == 0) {
 				ofs = get_column_width(0);
@@ -2698,6 +2704,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 				ofs += item_width + buttons_width;
 			}
 
+			StyleBox::enter_animation_group("cursor");
 			if (select_mode == SELECT_MULTI && selected_item == p_item && selected_col == i) {
 				cell_rect = convert_rtl_rect(cell_rect);
 				if (has_focus(true)) {
@@ -5084,6 +5091,7 @@ void Tree::_notification(int p_what) {
 			if (root && get_size().x > 0 && get_size().y > 0) {
 				int self_height = 0; // Just to pass a reference, we don't need the root's `self_height`.
 				draw_item(Point2(), draw_ofs, draw_size, root, self_height);
+				StyleBox::exit_animation_group("cursor");
 			}
 
 			if (show_column_titles) {

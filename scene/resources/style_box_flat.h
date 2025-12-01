@@ -109,4 +109,26 @@ public:
 
 	virtual Rect2 get_draw_rect(const Rect2 &p_rect) const override;
 	virtual void draw(RID p_canvas_item, const Rect2 &p_rect) const override;
+
+	LocalVector<StringName> get_animatable_props() const override {
+		static const LocalVector<StringName> props = {
+			SNAME("bg_color"),
+			SNAME("shadow_color"),
+			SNAME("border_color"),
+			SNAME("border_width_left"),
+			SNAME("border_width_top"),
+			SNAME("border_width_right"),
+			SNAME("border_width_bottom"),
+			SNAME("expand_margin_left"),
+			SNAME("expand_margin_top"),
+			SNAME("expand_margin_right"),
+			SNAME("expand_margin_bottom"),
+			SNAME("corner_radius_top_left"),
+			SNAME("corner_radius_top_right"),
+			SNAME("corner_radius_bottom_right"),
+			SNAME("corner_radius_bottom_left"),
+			SNAME("rect"),
+		};
+		return props;
+	}
 };

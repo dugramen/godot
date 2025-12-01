@@ -1100,6 +1100,8 @@ void register_scene_types() {
 	GDREGISTER_CLASS(TextParagraph);
 
 	GDREGISTER_VIRTUAL_CLASS(StyleBox);
+	GDREGISTER_CLASS(StyleBoxAnimationInfo);
+	GDREGISTER_CLASS(StyleBoxDrawModifier);
 	GDREGISTER_CLASS(StyleBoxEmpty);
 	GDREGISTER_CLASS(StyleBoxTexture);
 	GDREGISTER_CLASS(StyleBoxFlat);

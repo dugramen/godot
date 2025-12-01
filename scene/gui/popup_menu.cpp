@@ -898,9 +898,12 @@ void PopupMenu::_draw_items() {
 		Point2 item_ofs = ofs;
 		Size2 icon_size = _get_item_icon_size(i);
 		float h = _get_item_height(i);
+
+		StyleBox::enter_animation_group(itos(i));
 		if ((active_submenu_index == -1 && i == mouse_over) || i == active_submenu_index) {
 			theme_cache.hover_style->draw(ci, Rect2(item_ofs + Point2(0, -theme_cache.v_separation / 2), Size2(display_width, h + theme_cache.v_separation)));
 		}
+		StyleBox::exit_animation_group(itos(i));
 
 		String text = items[i].xl_text;
 

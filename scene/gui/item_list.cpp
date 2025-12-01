@@ -1392,13 +1392,19 @@ void ItemList::_notification(int p_what) {
 
 			Ref<StyleBox> sbsel;
 			Ref<StyleBox> cursor;
+			String sbsel_name;
+			String cursor_name;
 
 			if (has_focus(true)) {
 				sbsel = theme_cache.selected_focus_style;
+				sbsel_name = "selected_focus_style";
 				cursor = theme_cache.cursor_focus_style;
+				cursor_name = "cursor_focus_style";
 			} else {
 				sbsel = theme_cache.selected_style;
+				sbsel_name = "selected_style";
 				cursor = theme_cache.cursor_style;
+				cursor_name = "cursor_style";
 			}
 			bool rtl = is_layout_rtl();
 
@@ -1505,7 +1511,11 @@ void ItemList::_notification(int p_what) {
 				bool should_draw_hovered_bg = hovered == i && !items[i].selected;
 				bool should_draw_custom_bg = items[i].custom_bg.a > 0.001;
 
-				if (should_draw_selected_bg || should_draw_hovered_selected_bg || should_draw_hovered_bg || should_draw_custom_bg) {
+				StringName anim_id = StringName("item:" + itos(i));
+				StyleBox::enter_animation_group(anim_id);
+
+				bool should_draw_normal = !should_draw_selected_bg && !should_draw_hovered_selected_bg && !should_draw_hovered_bg && !should_draw_custom_bg;
+				{
 					Rect2 r = rcache;
 					r.position += base_ofs;
 
@@ -1529,7 +1539,13 @@ void ItemList::_notification(int p_what) {
 					if (should_draw_custom_bg) {
 						draw_rect(r, items[i].custom_bg);
 					}
+					if (should_draw_normal) {
+						draw_style_box(theme_cache.normal_style, r);
+					}
 				}
+
+				StyleBox::exit_animation_group(anim_id);
+				StyleBox::apply_group_modifiers("item:" + itos(i));
 
 				Vector2 text_ofs;
 				Size2 icon_size;
@@ -1569,6 +1585,7 @@ void ItemList::_notification(int p_what) {
 					if (items[i].disabled) {
 						icon_modulate.a *= 0.5;
 					}
+					icon_modulate = theme_cache.hovered_style->get_animated_value(SNAME("icon_modulate"), icon_modulate, anim_id);
 
 					// If the icon is transposed, we have to switch the size so that it is drawn correctly
 					if (items[i].icon_transposed) {
@@ -1620,6 +1637,7 @@ void ItemList::_notification(int p_what) {
 					if (items[i].disabled) {
 						txt_modulate.a *= 0.5;
 					}
+					txt_modulate = theme_cache.hovered_style->get_animated_value(SNAME("empty-text"), txt_modulate, anim_id);
 
 					if (icon_mode == ICON_MODE_TOP && max_text_lines > 0) {
 						text_ofs.y += MAX(theme_cache.v_separation, 0) / 2;
@@ -1690,11 +1708,13 @@ void ItemList::_notification(int p_what) {
 					}
 				}
 
+				StyleBox::reset_modifiers();
 				if (i == current && (select_mode == SELECT_MULTI || select_mode == SELECT_TOGGLE)) {
 					cursor_rcache = rcache;
 				}
 			}
 
+			StyleBox::enter_animation_group("cursor");
 			if (cursor_rcache.size != Size2()) { // Draw cursor last, so border isn't cut off.
 				cursor_rcache.position += base_ofs;
 
@@ -1704,13 +1724,17 @@ void ItemList::_notification(int p_what) {
 
 				draw_style_box(cursor, cursor_rcache);
 			}
+			StyleBox::exit_animation_group("cursor");
 
+			RenderingServer::get_singleton()->canvas_item_add_clip_ignore(get_canvas_item(), true);
+			StyleBox::enter_animation_group("list_focus");
 			if (has_focus(true)) {
-				RenderingServer::get_singleton()->canvas_item_add_clip_ignore(get_canvas_item(), true);
 				size.x -= (scroll_bar_h->get_max() - scroll_bar_h->get_page());
 				draw_style_box(theme_cache.focus_style, Rect2(Point2(), size));
-				RenderingServer::get_singleton()->canvas_item_add_clip_ignore(get_canvas_item(), false);
 			}
+
+			StyleBox::exit_animation_group("list_focus");
+			RenderingServer::get_singleton()->canvas_item_add_clip_ignore(get_canvas_item(), false);
 		} break;
 	}
 }
@@ -2391,6 +2415,7 @@ void ItemList::_bind_methods() {
 
 	BIND_THEME_ITEM(Theme::DATA_TYPE_CONSTANT, ItemList, line_separation);
 	BIND_THEME_ITEM(Theme::DATA_TYPE_CONSTANT, ItemList, icon_margin);
+	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_STYLEBOX, ItemList, normal_style, "normal");
 	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_STYLEBOX, ItemList, hovered_style, "hovered");
 	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_STYLEBOX, ItemList, hovered_selected_style, "hovered_selected");
 	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_STYLEBOX, ItemList, hovered_selected_focus_style, "hovered_selected_focus");

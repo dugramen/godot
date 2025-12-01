@@ -88,6 +88,22 @@ public:
 
 	virtual Rect2 get_draw_rect(const Rect2 &p_rect) const override;
 	virtual void draw(RID p_canvas_item, const Rect2 &p_rect) const override;
+
+	LocalVector<StringName> get_animatable_props() const override {
+		static const LocalVector<StringName> props = {
+			SNAME("texture_margin_left"),
+			SNAME("texture_margin_top"),
+			SNAME("texture_margin_right"),
+			SNAME("texture_margin_bottom"),
+			SNAME("expand_margin_left"),
+			SNAME("expand_margin_top"),
+			SNAME("expand_margin_right"),
+			SNAME("expand_margin_bottom"),
+			SNAME("region_rect"),
+			SNAME("modulate_color")
+		};
+		return props;
+	}
 };
 
 VARIANT_ENUM_CAST(StyleBoxTexture::AxisStretchMode)

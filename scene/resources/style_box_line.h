@@ -61,4 +61,14 @@ public:
 	float get_grow_end() const;
 
 	virtual void draw(RID p_canvas_item, const Rect2 &p_rect) const override;
+
+	LocalVector<StringName> get_animatable_props() const override {
+		static const LocalVector<StringName> props = {
+			SNAME("color"),
+			SNAME("grow_begin"),
+			SNAME("grow_end"),
+			SNAME("thickness")
+		};
+		return props;
+	}
 };
